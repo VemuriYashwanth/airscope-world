@@ -104,6 +104,7 @@ export default function MapView() {
   const applyHeatmap = useCallback((map: maplibregl.Map, on: boolean) => {
     try {
       if (map.getLayer('aqi-heat')) map.removeLayer('aqi-heat');
+      if (map.getLayer('aqi-circles')) map.removeLayer('aqi-circles');
     } catch { /* ignore */ }
     try {
       if (map.getSource('aqi-points')) map.removeSource('aqi-points');
