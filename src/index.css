@@ -120,4 +120,29 @@
   transition: none !important;
   animation: none !important;
   will-change: transform;
+  overflow: visible;
+}
+
+.aqi-marker[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+.aqi-marker[data-tooltip]:hover::after {
+  opacity: 1;
 }
