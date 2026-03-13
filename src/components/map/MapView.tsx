@@ -242,12 +242,16 @@ export default function MapView() {
       map.getCanvas().style.cursor = isPlace ? 'pointer' : '';
     });
 
-    // Scale markers on zoom
+    // Scale inner circles on zoom
     const updateMarkerScale = () => {
       const scale = getZoomScale(map.getZoom());
       markersRef.current.forEach(m => {
-        const el = m.getElement();
-        el.style.transform = el.style.transform.replace(/scale\([^)]*\)/, '') + ` scale(${scale})`;
+        const circle = m.getElement().querySelector('.aqi-marker') as HTMLElement;
+        if (circle) {
+          circle.dataset.zoomScale = String(scale);
+          const hs = circle.dataset.hovered === '1' ? 1.3 : 1;
+          circle.style.transform = `scale(${scale * hs})`;
+        }
       });
     };
     map.on('zoom', updateMarkerScale);
