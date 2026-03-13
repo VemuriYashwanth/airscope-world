@@ -245,10 +245,12 @@ export default function MapView() {
     });
 
     // Listen for reset view action
-    const unsubscribe = useAppStore.subscribe((state, prev) => {
-      if (prev.isZoomedIn && !state.isZoomedIn && !state.selectedCity) {
+    let prevIsZoomedIn = useAppStore.getState().isZoomedIn;
+    const unsubscribe = useAppStore.subscribe((state) => {
+      if (prevIsZoomedIn && !state.isZoomedIn && !state.selectedCity) {
         map.flyTo({ center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM, duration: 1500 });
       }
+      prevIsZoomedIn = state.isZoomedIn;
     });
 
     mapRef.current = map;
