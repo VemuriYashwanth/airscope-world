@@ -130,10 +130,10 @@ export default function MapView() {
         type: 'heatmap',
         source: 'aqi-points',
         paint: {
-          'heatmap-weight': ['interpolate', ['linear'], ['get', 'aqi'], 0, 0.1, 300, 1],
-          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 2, 9, 4],
-          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 60, 4, 80, 9, 100],
-          'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 0, 0.8, 9, 0.6],
+          'heatmap-weight': ['interpolate', ['linear'], ['get', 'aqi'], 0, 0.2, 50, 0.4, 150, 0.7, 300, 1],
+          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 2, 5, 3, 9, 5],
+          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 100, 3, 120, 6, 80, 9, 60],
+          'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 0, 0.85, 9, 0.5],
           'heatmap-color': [
             'interpolate', ['linear'], ['heatmap-density'],
             0, 'rgba(0,0,0,0)',
