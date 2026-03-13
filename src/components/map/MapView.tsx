@@ -104,45 +104,52 @@ export default function MapView() {
   const applyHeatmap = useCallback((map: maplibregl.Map, on: boolean) => {
     try {
       if (map.getLayer('aqi-heat')) map.removeLayer('aqi-heat');
+    } catch { /* ignore */ }
+    try {
       if (map.getSource('aqi-points')) map.removeSource('aqi-points');
     } catch { /* ignore */ }
 
     heatmapAppliedRef.current = on;
     if (!on) return;
 
-    map.addSource('aqi-points', {
-      type: 'geojson',
-      data: {
-        type: 'FeatureCollection',
-        features: MOCK_CITIES.map(c => ({
-          type: 'Feature' as const,
-          geometry: { type: 'Point' as const, coordinates: [c.lng, c.lat] },
-          properties: { aqi: c.aqi },
-        })),
-      },
-    });
+    try {
+      map.addSource('aqi-points', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: MOCK_CITIES.map(c => ({
+            type: 'Feature' as const,
+            geometry: { type: 'Point' as const, coordinates: [c.lng, c.lat] },
+            properties: { aqi: c.aqi },
+          })),
+        },
+      });
 
-    map.addLayer({
-      id: 'aqi-heat',
-      type: 'heatmap',
-      source: 'aqi-points',
-      paint: {
-        'heatmap-weight': ['interpolate', ['linear'], ['get', 'aqi'], 0, 0, 300, 1],
-        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 0.8, 9, 3],
-        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 40, 9, 70],
-        'heatmap-opacity': 0.65,
-        'heatmap-color': [
-          'interpolate', ['linear'], ['heatmap-density'],
-          0, 'rgba(0,0,0,0)',
-          0.1, '#00e400',
-          0.3, '#ffff00',
-          0.5, '#ff7e00',
-          0.7, '#ff0000',
-          0.9, '#8f3f97',
-          1, '#7e0023',
-        ],
-      },
-    });
+      map.addLayer({
+        id: 'aqi-heat',
+        type: 'heatmap',
+        source: 'aqi-points',
+        paint: {
+          'heatmap-weight': ['interpolate', ['linear'], ['get', 'aqi'], 0, 0, 300, 1],
+          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 0.8, 9, 3],
+          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 40, 9, 70],
+          'heatmap-opacity': 0.65,
+          'heatmap-color': [
+            'interpolate', ['linear'], ['heatmap-density'],
+            0, 'rgba(0,0,0,0)',
+            0.1, '#00e400',
+            0.3, '#ffff00',
+            0.5, '#ff7e00',
+            0.7, '#ff0000',
+            0.9, '#8f3f97',
+            1, '#7e0023',
+          ],
+        },
+      });
+      console.log('Heatmap layer added successfully');
+    } catch (err) {
+      console.error('Failed to add heatmap:', err);
+    }
   }, []);
 
   // Heatmap toggle
