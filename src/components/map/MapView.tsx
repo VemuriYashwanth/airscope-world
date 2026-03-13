@@ -263,14 +263,12 @@ export default function MapView() {
     const map = mapRef.current;
     const style = `https://basemaps.cartocdn.com/gl/${isDarkMode ? 'dark-matter-gl-style' : 'positron-gl-style'}/style.json`;
     map.setStyle(style);
-    map.once('styledata', () => {
+    map.once('style.load', () => {
+      addCircleLayer(map);
+      if (useAppStore.getState().isHeatmapOn) {
+        map.setLayoutProperty('aqi-circle-layer', 'visibility', 'visible');
+      }
       addMarkers(map);
-      map.once('load', () => {
-        addCircleLayer(map);
-        if (useAppStore.getState().isHeatmapOn) {
-          map.setLayoutProperty('aqi-circle-layer', 'visibility', 'visible');
-        }
-      });
     });
   }, [isDarkMode, addMarkers, addCircleLayer]);
 
