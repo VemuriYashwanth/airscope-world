@@ -115,3 +115,9 @@
 .maplibregl-ctrl-bottom-right {
   display: none !important;
 }
+
+.maplibregl-marker {
+  transition: none !important;
+  animation: none !important;
+  will-change: transform;
+}
