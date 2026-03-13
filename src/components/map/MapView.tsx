@@ -7,6 +7,15 @@ import { getAqiInfo, getMarkerSize } from '@/utils/aqi';
 const DEFAULT_CENTER: [number, number] = [20, 20];
 const DEFAULT_ZOOM = 2;
 
+// Module-level map reference for external access
+let globalMapInstance: maplibregl.Map | null = null;
+
+export function flyToWorldView() {
+  if (globalMapInstance) {
+    globalMapInstance.flyTo({ center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM, duration: 1500 });
+  }
+}
+
 export default function MapView() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
