@@ -157,12 +157,22 @@ export default function MapView() {
     const map = mapRef.current;
     if (!map) return;
 
-    const doApply = () => applyHeatmap(map, isHeatmapOn);
+    const doApply = () => {
+      console.log('Applying heatmap, on:', isHeatmapOn, 'styleLoaded:', map.isStyleLoaded());
+      applyHeatmap(map, isHeatmapOn);
+    };
 
     if (map.isStyleLoaded()) {
       doApply();
     } else {
-      map.once('load', doApply);
+      // Try both events - 'load' for first load, 'style.load' for style swaps
+      const handler = () => doApply();
+      map.once('load', handler);
+      map.once('style.load', handler);
+      return () => {
+        map.off('load', handler);
+        map.off('style.load', handler);
+      };
     }
   }, [isHeatmapOn, applyHeatmap]);
 
