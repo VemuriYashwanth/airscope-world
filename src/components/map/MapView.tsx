@@ -183,7 +183,7 @@ export default function MapView() {
       minZoom: 1.5,
     });
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    // No navigation controls — handled by custom UI
 
     map.on('load', () => {
       addCircleLayer(map);
