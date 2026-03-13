@@ -101,103 +101,71 @@ export default function MapView() {
     return nearest;
   }, []);
 
-  const applyHeatmap = useCallback((map: maplibregl.Map, on: boolean) => {
-    try {
-      if (map.getLayer('aqi-heat')) map.removeLayer('aqi-heat');
-      if (map.getLayer('aqi-circles')) map.removeLayer('aqi-circles');
-    } catch { /* ignore */ }
-    try {
-      if (map.getSource('aqi-points')) map.removeSource('aqi-points');
-    } catch { /* ignore */ }
+  const addHeatmapSource = useCallback((map: maplibregl.Map) => {
+    if (map.getSource('aqi-points')) return;
+    
+    map.addSource('aqi-points', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: MOCK_CITIES.map(c => ({
+          type: 'Feature' as const,
+          geometry: { type: 'Point' as const, coordinates: [c.lng, c.lat] },
+          properties: { aqi: c.aqi },
+        })),
+      },
+    });
 
-    heatmapAppliedRef.current = on;
-    if (!on) return;
-
-    try {
-      map.addSource('aqi-points', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: MOCK_CITIES.map(c => ({
-            type: 'Feature' as const,
-            geometry: { type: 'Point' as const, coordinates: [c.lng, c.lat] },
-            properties: { aqi: c.aqi },
-          })),
-        },
-      });
-
-      // Debug: add circle layer to verify data renders
-      map.addLayer({
-        id: 'aqi-circles',
-        type: 'circle',
-        source: 'aqi-points',
-        paint: {
-          'circle-radius': ['interpolate', ['linear'], ['get', 'aqi'], 0, 8, 300, 25],
-          'circle-color': [
-            'interpolate', ['linear'], ['get', 'aqi'],
-            0, '#00e400',
-            50, '#00e400',
-            100, '#ffff00',
-            150, '#ff7e00',
-            200, '#ff0000',
-            300, '#8f3f97',
-          ],
-          'circle-opacity': 0.7,
-          'circle-blur': 0.8,
-        },
-      });
-
-      map.addLayer({
-        id: 'aqi-heat',
-        type: 'heatmap',
-        source: 'aqi-points',
-        paint: {
-          'heatmap-weight': ['interpolate', ['linear'], ['get', 'aqi'], 0, 0.2, 50, 0.4, 150, 0.7, 300, 1],
-          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 2, 5, 3, 9, 5],
-          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 100, 3, 120, 6, 80, 9, 60],
-          'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 0, 0.85, 9, 0.5],
-          'heatmap-color': [
-            'interpolate', ['linear'], ['heatmap-density'],
-            0, 'rgba(0,0,0,0)',
-            0.01, 'rgba(0,228,0,0.4)',
-            0.05, '#00e400',
-            0.2, '#ffff00',
-            0.4, '#ff7e00',
-            0.6, '#ff0000',
-            0.8, '#8f3f97',
-            1, '#7e0023',
-          ],
-        },
-      });
-      console.log('Heatmap layer added successfully');
-    } catch (err) {
-      console.error('Failed to add heatmap:', err);
-    }
+    map.addLayer({
+      id: 'aqi-heat',
+      type: 'heatmap',
+      source: 'aqi-points',
+      layout: {
+        visibility: 'none',
+      },
+      paint: {
+        'heatmap-weight': ['interpolate', ['linear'], ['get', 'aqi'], 0, 0.2, 50, 0.4, 150, 0.7, 300, 1],
+        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 2, 5, 3, 9, 5],
+        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 80, 3, 100, 6, 70, 9, 50],
+        'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 0, 0.85, 9, 0.5],
+        'heatmap-color': [
+          'interpolate', ['linear'], ['heatmap-density'],
+          0, 'rgba(0,0,0,0)',
+          0.01, 'rgba(0,228,0,0.3)',
+          0.05, '#00e400',
+          0.2, '#ffff00',
+          0.4, '#ff7e00',
+          0.6, '#ff0000',
+          0.8, '#8f3f97',
+          1, '#7e0023',
+        ],
+      },
+    });
+    console.log('Heatmap source + layer initialized');
   }, []);
 
-  // Heatmap toggle
+  // Heatmap visibility toggle
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    const doApply = () => {
-      console.log('Applying heatmap, on:', isHeatmapOn, 'styleLoaded:', map.isStyleLoaded());
-      applyHeatmap(map, isHeatmapOn);
+    const setVisibility = () => {
+      try {
+        if (map.getLayer('aqi-heat')) {
+          map.setLayoutProperty('aqi-heat', 'visibility', isHeatmapOn ? 'visible' : 'none');
+          console.log('Heatmap visibility set to:', isHeatmapOn ? 'visible' : 'none');
+        }
+      } catch (err) {
+        console.error('Failed to toggle heatmap visibility:', err);
+      }
     };
 
     if (map.isStyleLoaded()) {
-      doApply();
+      setVisibility();
     } else {
-      // Try both events - 'load' for first load, 'style.load' for style swaps
-      const handler = () => doApply();
-      map.once('load', handler);
-      map.once('style.load', handler);
-      return () => {
-        map.off('load', handler);
-        map.off('style.load', handler);
-      };
+      map.once('load', setVisibility);
     }
-  }, [isHeatmapOn, applyHeatmap]);
+  }, [isHeatmapOn]);
 
   // Map init
   useEffect(() => {
@@ -215,6 +183,15 @@ export default function MapView() {
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
+    map.on('load', () => {
+      console.log('Map loaded, adding heatmap source');
+      addHeatmapSource(map);
+      // If heatmap was already toggled on before load
+      if (useAppStore.getState().isHeatmapOn) {
+        map.setLayoutProperty('aqi-heat', 'visibility', 'visible');
+      }
+    });
+
     // Add markers
     MOCK_CITIES.forEach((city) => {
       const el = createMarkerElement(city);
@@ -229,9 +206,8 @@ export default function MapView() {
       markersRef.current.push(marker);
     });
 
-    // Click on map labels (city/place names on the base tiles)
+    // Click on map labels
     map.on('click', (e) => {
-      // Check if a place label was clicked
       const features = map.queryRenderedFeatures(e.point);
       const placeFeature = features.find(f =>
         f.layer?.id?.includes('place') ||
@@ -290,12 +266,15 @@ export default function MapView() {
         markersRef.current.push(marker);
       });
 
-      // Re-apply heatmap if it was on
-      if (useAppStore.getState().isHeatmapOn) {
-        map.once('load', () => applyHeatmap(map, true));
-      }
+      // Re-add heatmap source after style change
+      map.once('load', () => {
+        addHeatmapSource(map);
+        if (useAppStore.getState().isHeatmapOn) {
+          map.setLayoutProperty('aqi-heat', 'visibility', 'visible');
+        }
+      });
     });
-  }, [isDarkMode, createMarkerElement, setSelectedCity, applyHeatmap]);
+  }, [isDarkMode, createMarkerElement, setSelectedCity, addHeatmapSource]);
 
   return <div ref={mapContainer} className="absolute inset-0 w-full h-full" />;
 }
