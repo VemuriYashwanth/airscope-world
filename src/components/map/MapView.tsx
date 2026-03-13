@@ -275,8 +275,3 @@ export default function MapView() {
 
   return <div ref={mapContainer} className="absolute inset-0 w-full h-full" />;
 }
-
-// Export for reset button
-export function resetMapView() {
-  // This is handled via store now
-}
