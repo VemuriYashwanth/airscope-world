@@ -7,6 +7,15 @@ import { getAqiInfo, getMarkerSize } from '@/utils/aqi';
 const DEFAULT_CENTER: [number, number] = [78.9629, 22.5937]; // India
 const DEFAULT_ZOOM = 3.5;
 
+/** Returns a scale factor for markers based on zoom level */
+function getZoomScale(zoom: number): number {
+  if (zoom <= 2) return 0.5;
+  if (zoom <= 3) return 0.65;
+  if (zoom <= 4) return 0.8;
+  if (zoom <= 5) return 0.9;
+  return 1;
+}
+
 // Module-level map reference for external access
 let globalMapInstance: maplibregl.Map | null = null;
 
