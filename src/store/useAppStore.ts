@@ -29,11 +29,14 @@ interface AppState {
   isPanelOpen: boolean;
   isDarkMode: boolean;
   isHeatmapOn: boolean;
+  isZoomedIn: boolean;
   setSelectedCity: (city: CityData | null) => void;
   setSearchQuery: (query: string) => void;
   setIsPanelOpen: (open: boolean) => void;
   toggleDarkMode: () => void;
   toggleHeatmap: () => void;
+  setIsZoomedIn: (zoomed: boolean) => void;
+  resetView: () => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -42,6 +45,7 @@ export const useAppStore = create<AppState>((set) => ({
   isPanelOpen: false,
   isDarkMode: window.matchMedia('(prefers-color-scheme: dark)').matches,
   isHeatmapOn: false,
+  isZoomedIn: false,
   setSelectedCity: (city) => set({ selectedCity: city, isPanelOpen: !!city }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setIsPanelOpen: (open) => set({ isPanelOpen: open }),
@@ -51,4 +55,6 @@ export const useAppStore = create<AppState>((set) => ({
     return { isDarkMode: next };
   }),
   toggleHeatmap: () => set((state) => ({ isHeatmapOn: !state.isHeatmapOn })),
+  setIsZoomedIn: (zoomed) => set({ isZoomedIn: zoomed }),
+  resetView: () => set({ isZoomedIn: false, selectedCity: null, isPanelOpen: false }),
 }));
