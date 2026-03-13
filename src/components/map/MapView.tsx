@@ -8,13 +8,13 @@ export default function MapView() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
+  const heatmapAppliedRef = useRef(false);
   const { setSelectedCity, isDarkMode, isHeatmapOn } = useAppStore();
 
   const createMarkerElement = useCallback((city: CityData) => {
     const info = getAqiInfo(city.aqi);
     const size = getMarkerSize(city.aqi);
     
-    // Outer wrapper with fixed size to prevent layout shifts on hover
     const wrapper = document.createElement('div');
     const wrapperSize = size * 3;
     wrapper.style.cssText = `
@@ -59,7 +59,6 @@ export default function MapView() {
       tooltip.style.opacity = '0';
     });
 
-    // Tooltip
     const tooltip = document.createElement('div');
     tooltip.style.cssText = `
       position: absolute;
@@ -86,60 +85,81 @@ export default function MapView() {
     return wrapper;
   }, []);
 
-  // Heatmap layer management
+  // Find nearest mock city to a coordinate
+  const findNearestCity = useCallback((lng: number, lat: number, maxDistKm = 200): CityData | null => {
+    let nearest: CityData | null = null;
+    let minDist = Infinity;
+    for (const city of MOCK_CITIES) {
+      const dlat = (city.lat - lat) * 111;
+      const dlng = (city.lng - lng) * 111 * Math.cos(lat * Math.PI / 180);
+      const dist = Math.sqrt(dlat * dlat + dlng * dlng);
+      if (dist < minDist && dist < maxDistKm) {
+        minDist = dist;
+        nearest = city;
+      }
+    }
+    return nearest;
+  }, []);
+
+  const applyHeatmap = useCallback((map: maplibregl.Map, on: boolean) => {
+    try {
+      if (map.getLayer('aqi-heat')) map.removeLayer('aqi-heat');
+      if (map.getSource('aqi-points')) map.removeSource('aqi-points');
+    } catch { /* ignore */ }
+
+    heatmapAppliedRef.current = on;
+    if (!on) return;
+
+    map.addSource('aqi-points', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: MOCK_CITIES.map(c => ({
+          type: 'Feature' as const,
+          geometry: { type: 'Point' as const, coordinates: [c.lng, c.lat] },
+          properties: { aqi: c.aqi },
+        })),
+      },
+    });
+
+    map.addLayer({
+      id: 'aqi-heat',
+      type: 'heatmap',
+      source: 'aqi-points',
+      paint: {
+        'heatmap-weight': ['interpolate', ['linear'], ['get', 'aqi'], 0, 0, 300, 1],
+        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 0.8, 9, 3],
+        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 40, 9, 70],
+        'heatmap-opacity': 0.65,
+        'heatmap-color': [
+          'interpolate', ['linear'], ['heatmap-density'],
+          0, 'rgba(0,0,0,0)',
+          0.1, '#00e400',
+          0.3, '#ffff00',
+          0.5, '#ff7e00',
+          0.7, '#ff0000',
+          0.9, '#8f3f97',
+          1, '#7e0023',
+        ],
+      },
+    });
+  }, []);
+
+  // Heatmap toggle
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    const applyHeatmap = () => {
-      // Remove existing heatmap
-      if (map.getLayer('aqi-heat')) map.removeLayer('aqi-heat');
-      if (map.getSource('aqi-points')) map.removeSource('aqi-points');
-
-      if (!isHeatmapOn) return;
-
-      map.addSource('aqi-points', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: MOCK_CITIES.map(c => ({
-            type: 'Feature' as const,
-            geometry: { type: 'Point' as const, coordinates: [c.lng, c.lat] },
-            properties: { aqi: c.aqi },
-          })),
-        },
-      });
-
-      map.addLayer({
-        id: 'aqi-heat',
-        type: 'heatmap',
-        source: 'aqi-points',
-        paint: {
-          'heatmap-weight': ['interpolate', ['linear'], ['get', 'aqi'], 0, 0, 300, 1],
-          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 0.6, 9, 3],
-          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 30, 9, 60],
-          'heatmap-opacity': 0.6,
-          'heatmap-color': [
-            'interpolate', ['linear'], ['heatmap-density'],
-            0, 'rgba(0,0,0,0)',
-            0.1, '#00e400',
-            0.3, '#ffff00',
-            0.5, '#ff7e00',
-            0.7, '#ff0000',
-            0.9, '#8f3f97',
-            1, '#7e0023',
-          ],
-        },
-      });
-    };
+    const doApply = () => applyHeatmap(map, isHeatmapOn);
 
     if (map.isStyleLoaded()) {
-      applyHeatmap();
+      doApply();
     } else {
-      map.once('styledata', applyHeatmap);
+      map.once('load', doApply);
     }
-  }, [isHeatmapOn, isDarkMode]);
+  }, [isHeatmapOn, applyHeatmap]);
 
+  // Map init
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return;
 
@@ -155,10 +175,72 @@ export default function MapView() {
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
-    const addMarkers = () => {
+    // Add markers
+    MOCK_CITIES.forEach((city) => {
+      const el = createMarkerElement(city);
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setSelectedCity(city);
+        map.flyTo({ center: [city.lng, city.lat], zoom: 8, duration: 1500 });
+      });
+      const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([city.lng, city.lat])
+        .addTo(map);
+      markersRef.current.push(marker);
+    });
+
+    // Click on map labels (city/place names on the base tiles)
+    map.on('click', (e) => {
+      // Check if a place label was clicked
+      const features = map.queryRenderedFeatures(e.point);
+      const placeFeature = features.find(f =>
+        f.layer?.id?.includes('place') ||
+        f.layer?.id?.includes('city') ||
+        f.layer?.id?.includes('town') ||
+        f.layer?.id?.includes('label') ||
+        f.layer?.id?.includes('poi')
+      );
+
+      if (placeFeature) {
+        const nearest = findNearestCity(e.lngLat.lng, e.lngLat.lat, 300);
+        if (nearest) {
+          setSelectedCity(nearest);
+          map.flyTo({ center: [nearest.lng, nearest.lat], zoom: 8, duration: 1500 });
+        }
+      }
+    });
+
+    // Change cursor on place labels
+    map.on('mousemove', (e) => {
+      const features = map.queryRenderedFeatures(e.point);
+      const isPlace = features.some(f =>
+        f.layer?.id?.includes('place') ||
+        f.layer?.id?.includes('city') ||
+        f.layer?.id?.includes('town') ||
+        f.layer?.id?.includes('label')
+      );
+      map.getCanvas().style.cursor = isPlace ? 'pointer' : '';
+    });
+
+    mapRef.current = map;
+
+    return () => { map.remove(); mapRef.current = null; };
+  }, []);
+
+  // Dark mode style swap
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const map = mapRef.current;
+    const style = `https://basemaps.cartocdn.com/gl/${isDarkMode ? 'dark-matter-gl-style' : 'positron-gl-style'}/style.json`;
+    map.setStyle(style);
+    map.once('styledata', () => {
+      // Re-add markers
+      markersRef.current.forEach(m => m.remove());
+      markersRef.current = [];
       MOCK_CITIES.forEach((city) => {
         const el = createMarkerElement(city);
-        el.addEventListener('click', () => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
           setSelectedCity(city);
           map.flyTo({ center: [city.lng, city.lat], zoom: 8, duration: 1500 });
         });
@@ -167,35 +249,13 @@ export default function MapView() {
           .addTo(map);
         markersRef.current.push(marker);
       });
-    };
 
-    addMarkers();
-    mapRef.current = map;
-
-    return () => { map.remove(); mapRef.current = null; };
-  }, []);
-
-  // Update map style on dark mode change
-  useEffect(() => {
-    if (!mapRef.current) return;
-    const style = `https://basemaps.cartocdn.com/gl/${isDarkMode ? 'dark-matter-gl-style' : 'positron-gl-style'}/style.json`;
-    mapRef.current.setStyle(style);
-    mapRef.current.once('styledata', () => {
-      markersRef.current.forEach(m => m.remove());
-      markersRef.current = [];
-      MOCK_CITIES.forEach((city) => {
-        const el = createMarkerElement(city);
-        el.addEventListener('click', () => {
-          setSelectedCity(city);
-          mapRef.current?.flyTo({ center: [city.lng, city.lat], zoom: 8, duration: 1500 });
-        });
-        const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
-          .setLngLat([city.lng, city.lat])
-          .addTo(mapRef.current!);
-        markersRef.current.push(marker);
-      });
+      // Re-apply heatmap if it was on
+      if (useAppStore.getState().isHeatmapOn) {
+        map.once('load', () => applyHeatmap(map, true));
+      }
     });
-  }, [isDarkMode, createMarkerElement, setSelectedCity]);
+  }, [isDarkMode, createMarkerElement, setSelectedCity, applyHeatmap]);
 
   return <div ref={mapContainer} className="absolute inset-0 w-full h-full" />;
 }
