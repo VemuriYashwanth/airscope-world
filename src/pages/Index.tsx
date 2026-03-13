@@ -3,6 +3,7 @@ import MapView from '@/components/map/MapView';
 import CitySearch from '@/components/CitySearch';
 import CityPanel from '@/components/CityPanel';
 import ThemeToggle from '@/components/ThemeToggle';
+import HeatmapToggle from '@/components/HeatmapToggle';
 import { useAppStore } from '@/store/useAppStore';
 
 export default function Index() {
@@ -16,6 +17,7 @@ export default function Index() {
     <div className="relative w-screen h-screen overflow-hidden bg-background">
       <MapView />
       <CitySearch />
+      <HeatmapToggle />
       <ThemeToggle />
       <CityPanel />
 
