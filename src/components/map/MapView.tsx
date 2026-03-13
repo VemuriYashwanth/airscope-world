@@ -44,9 +44,11 @@ export default function MapView() {
       cursor: pointer;
     `;
 
-    // Inner circle — hover effects go here (safe from MapLibre transforms)
+    // Inner circle — hover & zoom effects go here (safe from MapLibre transforms)
     const circle = document.createElement('div');
     circle.className = 'aqi-marker';
+    circle.dataset.zoomScale = '1';
+    circle.dataset.hovered = '0';
     circle.style.cssText = `
       width: 100%;
       height: 100%;
@@ -61,18 +63,26 @@ export default function MapView() {
       font-weight: 700;
       color: white;
       text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
       transform-origin: center center;
     `;
     circle.textContent = String(city.aqi);
     circle.setAttribute('data-tooltip', `${city.name} – ${info.label}`);
 
+    const applyScale = () => {
+      const zs = parseFloat(circle.dataset.zoomScale || '1');
+      const hs = circle.dataset.hovered === '1' ? 1.3 : 1;
+      circle.style.transform = `scale(${zs * hs})`;
+    };
+
     wrapper.addEventListener('mouseenter', () => {
-      circle.style.transform = 'scale(1.3)';
+      circle.dataset.hovered = '1';
+      applyScale();
       circle.style.boxShadow = `0 0 ${size * 2}px ${info.color}, 0 4px 16px rgba(0,0,0,0.4)`;
     });
     wrapper.addEventListener('mouseleave', () => {
-      circle.style.transform = 'scale(1)';
+      circle.dataset.hovered = '0';
+      applyScale();
       circle.style.boxShadow = `0 0 ${size}px ${info.color}80, 0 2px 8px rgba(0,0,0,0.3)`;
     });
 
