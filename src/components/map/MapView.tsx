@@ -9,10 +9,12 @@ const DEFAULT_ZOOM = 3.5;
 
 /** Returns a scale factor for markers based on zoom level */
 function getZoomScale(zoom: number): number {
-  if (zoom <= 2) return 0.5;
-  if (zoom <= 3) return 0.65;
-  if (zoom <= 4) return 0.8;
-  if (zoom <= 5) return 0.9;
+  if (zoom <= 2) return 0.35;
+  if (zoom <= 3) return 0.5;
+  if (zoom <= 3.5) return 0.6;
+  if (zoom <= 4) return 0.7;
+  if (zoom <= 5) return 0.8;
+  if (zoom <= 6) return 0.9;
   return 1;
 }
 
