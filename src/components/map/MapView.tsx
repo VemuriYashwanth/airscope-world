@@ -84,7 +84,7 @@ export default function MapView() {
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
-    map.on('load', () => {
+    const addMarkers = () => {
       MOCK_CITIES.forEach((city) => {
         const el = createMarkerElement(city);
         el.addEventListener('click', () => {
@@ -96,7 +96,10 @@ export default function MapView() {
           .addTo(map);
         markersRef.current.push(marker);
       });
-    });
+    };
+
+    // Add markers immediately - they don't need map style to be loaded
+    addMarkers();
 
     mapRef.current = map;
 
