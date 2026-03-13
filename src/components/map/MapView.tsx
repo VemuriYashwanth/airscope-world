@@ -96,7 +96,10 @@ export default function MapView() {
           .addTo(map);
         markersRef.current.push(marker);
       });
-    });
+    };
+
+    // Add markers immediately - they don't need map style to be loaded
+    addMarkers();
 
     mapRef.current = map;
 
