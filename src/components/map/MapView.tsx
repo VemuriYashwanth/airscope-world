@@ -232,6 +232,17 @@ export default function MapView() {
       map.getCanvas().style.cursor = isPlace ? 'pointer' : '';
     });
 
+    // Scale markers on zoom
+    const updateMarkerScale = () => {
+      const scale = getZoomScale(map.getZoom());
+      markersRef.current.forEach(m => {
+        const el = m.getElement();
+        el.style.transform = el.style.transform.replace(/scale\([^)]*\)/, '') + ` scale(${scale})`;
+      });
+    };
+    map.on('zoom', updateMarkerScale);
+    updateMarkerScale();
+
     // Track zoom for reset button
     map.on('zoomend', () => {
       useAppStore.getState().setIsZoomedIn(map.getZoom() > DEFAULT_ZOOM + 1);
