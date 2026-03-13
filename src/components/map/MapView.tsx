@@ -125,9 +125,9 @@ export default function MapView() {
       paint: {
         'circle-radius': [
           'interpolate', ['linear'], ['zoom'],
-          1, ['interpolate', ['linear'], ['get', 'aqi'], 0, 8, 100, 14, 200, 20, 300, 28],
-          5, ['interpolate', ['linear'], ['get', 'aqi'], 0, 16, 100, 28, 200, 40, 300, 55],
-          10, ['interpolate', ['linear'], ['get', 'aqi'], 0, 24, 100, 40, 200, 60, 300, 80],
+          1, ['interpolate', ['linear'], ['get', 'aqi'], 0, 30, 100, 50, 200, 70, 300, 90],
+          5, ['interpolate', ['linear'], ['get', 'aqi'], 0, 50, 100, 80, 200, 110, 300, 140],
+          10, ['interpolate', ['linear'], ['get', 'aqi'], 0, 60, 100, 100, 200, 140, 300, 180],
         ],
         'circle-color': [
           'interpolate', ['linear'], ['get', 'aqi'],
@@ -143,8 +143,8 @@ export default function MapView() {
           300, 'hsl(280, 60%, 45%)',
           301, 'hsl(0, 60%, 30%)',
         ],
-        'circle-opacity': 0.35,
-        'circle-blur': 0.8,
+        'circle-opacity': 0.45,
+        'circle-blur': 0.7,
       },
     });
   }, []);
