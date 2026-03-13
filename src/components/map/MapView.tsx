@@ -125,6 +125,27 @@ export default function MapView() {
         },
       });
 
+      // Debug: add circle layer to verify data renders
+      map.addLayer({
+        id: 'aqi-circles',
+        type: 'circle',
+        source: 'aqi-points',
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['get', 'aqi'], 0, 8, 300, 25],
+          'circle-color': [
+            'interpolate', ['linear'], ['get', 'aqi'],
+            0, '#00e400',
+            50, '#00e400',
+            100, '#ffff00',
+            150, '#ff7e00',
+            200, '#ff0000',
+            300, '#8f3f97',
+          ],
+          'circle-opacity': 0.7,
+          'circle-blur': 0.8,
+        },
+      });
+
       map.addLayer({
         id: 'aqi-heat',
         type: 'heatmap',
