@@ -7,6 +7,15 @@ import { getAqiInfo, getMarkerSize } from '@/utils/aqi';
 const DEFAULT_CENTER: [number, number] = [20, 20];
 const DEFAULT_ZOOM = 2;
 
+// Module-level map reference for external access
+let globalMapInstance: maplibregl.Map | null = null;
+
+export function flyToWorldView() {
+  if (globalMapInstance) {
+    globalMapInstance.flyTo({ center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM, duration: 1500 });
+  }
+}
+
 export default function MapView() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -125,9 +134,9 @@ export default function MapView() {
       paint: {
         'circle-radius': [
           'interpolate', ['linear'], ['zoom'],
-          1, ['interpolate', ['linear'], ['get', 'aqi'], 0, 8, 100, 14, 200, 20, 300, 28],
-          5, ['interpolate', ['linear'], ['get', 'aqi'], 0, 16, 100, 28, 200, 40, 300, 55],
-          10, ['interpolate', ['linear'], ['get', 'aqi'], 0, 24, 100, 40, 200, 60, 300, 80],
+          1, ['interpolate', ['linear'], ['get', 'aqi'], 0, 30, 100, 50, 200, 70, 300, 90],
+          5, ['interpolate', ['linear'], ['get', 'aqi'], 0, 50, 100, 80, 200, 110, 300, 140],
+          10, ['interpolate', ['linear'], ['get', 'aqi'], 0, 60, 100, 100, 200, 140, 300, 180],
         ],
         'circle-color': [
           'interpolate', ['linear'], ['get', 'aqi'],
@@ -143,8 +152,8 @@ export default function MapView() {
           300, 'hsl(280, 60%, 45%)',
           301, 'hsl(0, 60%, 30%)',
         ],
-        'circle-opacity': 0.35,
-        'circle-blur': 0.8,
+        'circle-opacity': 0.45,
+        'circle-blur': 0.7,
       },
     });
   }, []);
@@ -244,15 +253,9 @@ export default function MapView() {
       useAppStore.getState().setIsZoomedIn(map.getZoom() > DEFAULT_ZOOM + 1);
     });
 
-    // Listen for reset view action
-    const unsubscribe = useAppStore.subscribe((state, prev) => {
-      if (prev.isZoomedIn && !state.isZoomedIn && !state.selectedCity) {
-        map.flyTo({ center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM, duration: 1500 });
-      }
-    });
-
     mapRef.current = map;
-    return () => { unsubscribe(); map.remove(); mapRef.current = null; };
+    globalMapInstance = map;
+    return () => { map.remove(); mapRef.current = null; globalMapInstance = null; };
   }, []);
 
   // Dark mode style swap
@@ -261,21 +264,14 @@ export default function MapView() {
     const map = mapRef.current;
     const style = `https://basemaps.cartocdn.com/gl/${isDarkMode ? 'dark-matter-gl-style' : 'positron-gl-style'}/style.json`;
     map.setStyle(style);
-    map.once('styledata', () => {
+    map.once('style.load', () => {
+      addCircleLayer(map);
+      if (useAppStore.getState().isHeatmapOn) {
+        map.setLayoutProperty('aqi-circle-layer', 'visibility', 'visible');
+      }
       addMarkers(map);
-      map.once('load', () => {
-        addCircleLayer(map);
-        if (useAppStore.getState().isHeatmapOn) {
-          map.setLayoutProperty('aqi-circle-layer', 'visibility', 'visible');
-        }
-      });
     });
   }, [isDarkMode, addMarkers, addCircleLayer]);
 
   return <div ref={mapContainer} className="absolute inset-0 w-full h-full" />;
-}
-
-// Export for reset button
-export function resetMapView() {
-  // This is handled via store now
 }
