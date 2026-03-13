@@ -84,7 +84,7 @@ export default function MapView() {
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
-    map.on('load', () => {
+    const addMarkers = () => {
       MOCK_CITIES.forEach((city) => {
         const el = createMarkerElement(city);
         el.addEventListener('click', () => {
