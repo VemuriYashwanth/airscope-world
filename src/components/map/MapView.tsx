@@ -26,23 +26,12 @@ export default function MapView() {
     const info = getAqiInfo(city.aqi);
     const size = getMarkerSize(city.aqi);
 
-    const wrapper = document.createElement('div');
-    const wrapperSize = size * 3;
-    wrapper.style.cssText = `
-      width: ${wrapperSize}px;
-      height: ${wrapperSize}px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      position: relative;
-    `;
-
     const el = document.createElement('div');
     el.className = 'aqi-marker';
+    const diameter = size * 2;
     el.style.cssText = `
-      width: ${size * 2}px;
-      height: ${size * 2}px;
+      width: ${diameter}px;
+      height: ${diameter}px;
       border-radius: 50%;
       background: ${info.color};
       border: 2px solid rgba(255,255,255,0.8);
@@ -54,46 +43,24 @@ export default function MapView() {
       font-weight: 700;
       color: white;
       text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      transform-origin: center center;
+      cursor: pointer;
+      position: relative;
     `;
     el.textContent = String(city.aqi);
 
-    const tooltip = document.createElement('div');
-    tooltip.style.cssText = `
-      position: absolute;
-      bottom: calc(100%);
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 500;
-      white-space: nowrap;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.2s;
-      background: rgba(0,0,0,0.8);
-      color: white;
-      backdrop-filter: blur(8px);
-      z-index: 10;
-    `;
-    tooltip.textContent = `${city.name} – ${info.label}`;
+    // Tooltip via data attribute + CSS
+    el.setAttribute('data-tooltip', `${city.name} – ${info.label}`);
 
-    wrapper.addEventListener('mouseenter', () => {
+    el.addEventListener('mouseenter', () => {
       el.style.transform = 'scale(1.3)';
       el.style.boxShadow = `0 0 ${size * 2}px ${info.color}, 0 4px 16px rgba(0,0,0,0.4)`;
-      tooltip.style.opacity = '1';
     });
-    wrapper.addEventListener('mouseleave', () => {
+    el.addEventListener('mouseleave', () => {
       el.style.transform = 'scale(1)';
       el.style.boxShadow = `0 0 ${size}px ${info.color}80, 0 2px 8px rgba(0,0,0,0.3)`;
-      tooltip.style.opacity = '0';
     });
 
-    wrapper.appendChild(el);
-    wrapper.appendChild(tooltip);
-    return wrapper;
+    return el;
   }, []);
 
   const findNearestCity = useCallback((lng: number, lat: number, maxDistKm = 200): CityData | null => {
