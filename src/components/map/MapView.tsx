@@ -253,17 +253,9 @@ export default function MapView() {
       useAppStore.getState().setIsZoomedIn(map.getZoom() > DEFAULT_ZOOM + 1);
     });
 
-    // Listen for reset view action
-    let prevIsZoomedIn = useAppStore.getState().isZoomedIn;
-    const unsubscribe = useAppStore.subscribe((state) => {
-      if (prevIsZoomedIn && !state.isZoomedIn && !state.selectedCity) {
-        map.flyTo({ center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM, duration: 1500 });
-      }
-      prevIsZoomedIn = state.isZoomedIn;
-    });
-
     mapRef.current = map;
-    return () => { unsubscribe(); map.remove(); mapRef.current = null; };
+    globalMapInstance = map;
+    return () => { map.remove(); mapRef.current = null; globalMapInstance = null; };
   }, []);
 
   // Dark mode style swap
