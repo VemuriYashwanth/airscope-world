@@ -10,10 +10,10 @@ export function getAqiInfo(aqi: number) {
 
 /** Returns marker size based on AQI */
 export function getMarkerSize(aqi: number): number {
-  if (aqi <= 50) return 12;
-  if (aqi <= 100) return 14;
-  if (aqi <= 150) return 16;
-  if (aqi <= 200) return 18;
-  if (aqi <= 300) return 20;
-  return 24;
+  if (aqi <= 50) return 18;
+  if (aqi <= 100) return 20;
+  if (aqi <= 150) return 22;
+  if (aqi <= 200) return 24;
+  if (aqi <= 300) return 26;
+  return 30;
 }
