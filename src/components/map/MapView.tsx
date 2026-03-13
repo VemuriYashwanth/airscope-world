@@ -4,8 +4,8 @@ import { useAppStore, CityData } from '@/store/useAppStore';
 import { MOCK_CITIES } from '@/data/mockCities';
 import { getAqiInfo, getMarkerSize } from '@/utils/aqi';
 
-const DEFAULT_CENTER: [number, number] = [20, 20];
-const DEFAULT_ZOOM = 2;
+const DEFAULT_CENTER: [number, number] = [78.9629, 22.5937]; // India
+const DEFAULT_ZOOM = 3.5;
 
 // Module-level map reference for external access
 let globalMapInstance: maplibregl.Map | null = null;
