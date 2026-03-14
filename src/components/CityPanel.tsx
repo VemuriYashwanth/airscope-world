@@ -48,13 +48,7 @@ export default function CityPanel() {
 function PanelContent({ city, info, onClose }: { city: NonNullable<ReturnType<typeof useAppStore.getState>['selectedCity']>; info: ReturnType<typeof getAqiInfo>; onClose: () => void }) {
   const isLive = useAppStore((s) => s.isLiveData);
   return (
-    <div className="rounded-t-3xl md:rounded-none md:h-full p-6 space-y-6 glass-panel md:border md:border-border" style={{ background: undefined }} >
-      <style>{`
-        @media (min-width: 768px) {
-          .city-panel-desktop { background: hsl(var(--card)) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-        }
-      `}</style>
-      <div className="city-panel-desktop absolute inset-0 rounded-t-3xl md:rounded-none" style={{ display: 'none' }} />
+    <div className="rounded-t-3xl md:rounded-none md:h-full p-6 space-y-6 glass-panel md:bg-card md:[backdrop-filter:none] md:[-webkit-backdrop-filter:none] md:border-l md:border-border">
       {/* Drag handle mobile */}
       <div className="w-10 h-1 bg-muted-foreground/30 rounded-full mx-auto md:hidden" />
 
