@@ -46,6 +46,7 @@ export default function CityPanel() {
 }
 
 function PanelContent({ city, info, onClose }: { city: NonNullable<ReturnType<typeof useAppStore.getState>['selectedCity']>; info: ReturnType<typeof getAqiInfo>; onClose: () => void }) {
+  const isLive = useAppStore((s) => s.isLiveData);
   return (
     <div className="glass-panel rounded-t-3xl md:rounded-none md:h-full p-6 space-y-6">
       {/* Drag handle mobile */}
@@ -54,7 +55,15 @@ function PanelContent({ city, info, onClose }: { city: NonNullable<ReturnType<ty
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">{city.name}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-foreground">{city.name}</h2>
+            {isLive && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold uppercase tracking-wider">
+                <Radio className="w-2.5 h-2.5 animate-pulse" />
+                Live
+              </span>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">{city.country}</p>
         </div>
         <button onClick={onClose} className="p-2 rounded-full hover:bg-secondary/50 transition-colors text-muted-foreground">
