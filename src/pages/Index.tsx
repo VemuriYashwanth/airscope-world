@@ -5,6 +5,7 @@ import CityPanel from '@/components/CityPanel';
 import ThemeToggle from '@/components/ThemeToggle';
 import HeatmapToggle from '@/components/HeatmapToggle';
 import ResetViewButton from '@/components/ResetViewButton';
+import AqiLegend from '@/components/AqiLegend';
 import { useAppStore } from '@/store/useAppStore';
 
 export default function Index() {
