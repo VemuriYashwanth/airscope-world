@@ -112,24 +112,27 @@ function PanelContent({ city, info, onClose }: { city: NonNullable<ReturnType<ty
       </div>
 
       {/* Hourly Forecast */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground mb-3">Hourly Forecast</h3>
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-          {city.hourlyForecast.slice(0, 12).map((h, i) => (
-            <div key={i} className="flex flex-col items-center gap-1 min-w-[48px]">
-              <span className="text-xs text-muted-foreground">{h.hour}</span>
-              <span className="text-lg">{h.icon}</span>
-              <span className="text-xs font-medium text-foreground">{h.temp}°</span>
-            </div>
-          ))}
+      {city.hourlyForecast.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground mb-3">Hourly Forecast</h3>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {city.hourlyForecast.slice(0, 12).map((h, i) => (
+              <div key={i} className="flex flex-col items-center gap-1 min-w-[48px]">
+                <span className="text-xs text-muted-foreground">{h.hour}</span>
+                <span className="text-lg">{h.icon}</span>
+                <span className="text-xs font-medium text-foreground">{h.temp}°</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 7-Day */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground mb-3">7-Day Forecast</h3>
-        <div className="space-y-2">
-          {city.dailyForecast.map((d, i) => (
+      {city.dailyForecast.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground mb-3">7-Day Forecast</h3>
+          <div className="space-y-2">
+            {city.dailyForecast.map((d, i) => (
             <div key={i} className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0">
               <span className="text-sm text-foreground w-10">{d.day}</span>
               <span className="text-lg">{d.icon}</span>
