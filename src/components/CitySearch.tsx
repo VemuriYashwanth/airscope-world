@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import { MOCK_CITIES } from '@/data/mockCities';
 import { getAqiInfo } from '@/utils/aqi';
+import { flyToCity } from '@/components/map/MapView';
 
 export default function CitySearch() {
   const [query, setQuery] = useState('');
@@ -20,6 +21,7 @@ export default function CitySearch() {
 
   const handleSelect = (city: typeof MOCK_CITIES[0]) => {
     setSelectedCity(city);
+    flyToCity(city.lng, city.lat);
     setQuery('');
     setIsFocused(false);
   };

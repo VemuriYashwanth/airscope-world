@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Wind, Droplets, Sun, Thermometer } from 'lucide-react';
+import { X, Wind, Droplets, Sun, Thermometer, Radio } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { getAqiInfo } from '@/utils/aqi';
 import AqiChart from './AqiChart';
@@ -46,6 +46,7 @@ export default function CityPanel() {
 }
 
 function PanelContent({ city, info, onClose }: { city: NonNullable<ReturnType<typeof useAppStore.getState>['selectedCity']>; info: ReturnType<typeof getAqiInfo>; onClose: () => void }) {
+  const isLive = useAppStore((s) => s.isLiveData);
   return (
     <div className="glass-panel rounded-t-3xl md:rounded-none md:h-full p-6 space-y-6">
       {/* Drag handle mobile */}
@@ -54,7 +55,15 @@ function PanelContent({ city, info, onClose }: { city: NonNullable<ReturnType<ty
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">{city.name}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-foreground">{city.name}</h2>
+            {isLive && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold uppercase tracking-wider">
+                <Radio className="w-2.5 h-2.5 animate-pulse" />
+                Live
+              </span>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">{city.country}</p>
         </div>
         <button onClick={onClose} className="p-2 rounded-full hover:bg-secondary/50 transition-colors text-muted-foreground">
@@ -103,42 +112,46 @@ function PanelContent({ city, info, onClose }: { city: NonNullable<ReturnType<ty
       </div>
 
       {/* Hourly Forecast */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground mb-3">Hourly Forecast</h3>
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-          {city.hourlyForecast.slice(0, 12).map((h, i) => (
-            <div key={i} className="flex flex-col items-center gap-1 min-w-[48px]">
-              <span className="text-xs text-muted-foreground">{h.hour}</span>
-              <span className="text-lg">{h.icon}</span>
-              <span className="text-xs font-medium text-foreground">{h.temp}°</span>
-            </div>
-          ))}
+      {city.hourlyForecast.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground mb-3">Hourly Forecast</h3>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {city.hourlyForecast.slice(0, 12).map((h, i) => (
+              <div key={i} className="flex flex-col items-center gap-1 min-w-[48px]">
+                <span className="text-xs text-muted-foreground">{h.hour}</span>
+                <span className="text-lg">{h.icon}</span>
+                <span className="text-xs font-medium text-foreground">{h.temp}°</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 7-Day */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground mb-3">7-Day Forecast</h3>
-        <div className="space-y-2">
-          {city.dailyForecast.map((d, i) => (
-            <div key={i} className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0">
-              <span className="text-sm text-foreground w-10">{d.day}</span>
-              <span className="text-lg">{d.icon}</span>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">{d.low}°</span>
-                <div className="w-16 h-1 rounded-full bg-secondary overflow-hidden">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${((d.high - d.low) / 40) * 100}%` }} />
+      {city.dailyForecast.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground mb-3">7-Day Forecast</h3>
+          <div className="space-y-2">
+            {city.dailyForecast.map((d, i) => (
+              <div key={i} className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0">
+                <span className="text-sm text-foreground w-10">{d.day}</span>
+                <span className="text-lg">{d.icon}</span>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-muted-foreground">{d.low}°</span>
+                  <div className="w-16 h-1 rounded-full bg-secondary overflow-hidden">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${((d.high - d.low) / 40) * 100}%` }} />
+                  </div>
+                  <span className="text-foreground font-medium">{d.high}°</span>
                 </div>
-                <span className="text-foreground font-medium">{d.high}°</span>
+                <AqiBadge aqi={d.aqi} />
               </div>
-              <AqiBadge aqi={d.aqi} />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* AQI Chart */}
-      <AqiChart data={city.hourlyForecast} />
+      {city.hourlyForecast.length > 0 && <AqiChart data={city.hourlyForecast} />}
     </div>
   );
 }
