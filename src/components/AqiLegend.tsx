@@ -11,7 +11,7 @@ const AQI_TIERS = [
 
 export default function AqiLegend() {
   return (
-    <div className="absolute bottom-4 right-4 z-10 glass-panel rounded-2xl px-3 py-2.5 hidden sm:block">
+    <div className="absolute bottom-14 right-2 sm:bottom-4 sm:right-4 z-10 glass-panel rounded-2xl px-2 py-2 sm:px-3 sm:py-2.5">
       <div className="text-[10px] font-semibold text-muted-foreground mb-1.5 uppercase tracking-wider">
         AQI Scale
       </div>
