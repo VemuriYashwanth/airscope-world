@@ -30,12 +30,14 @@ interface AppState {
   isDarkMode: boolean;
   isHeatmapOn: boolean;
   isZoomedIn: boolean;
+  isLiveData: boolean;
   setSelectedCity: (city: CityData | null) => void;
   setSearchQuery: (query: string) => void;
   setIsPanelOpen: (open: boolean) => void;
   toggleDarkMode: () => void;
   toggleHeatmap: () => void;
   setIsZoomedIn: (zoomed: boolean) => void;
+  setIsLiveData: (live: boolean) => void;
   resetView: () => void;
 }
 
