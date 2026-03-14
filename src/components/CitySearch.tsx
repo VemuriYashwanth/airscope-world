@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import { MOCK_CITIES } from '@/data/mockCities';
 import { getAqiInfo } from '@/utils/aqi';
+import { flyToCity } from '@/components/map/MapView';
 
 export default function CitySearch() {
   const [query, setQuery] = useState('');
