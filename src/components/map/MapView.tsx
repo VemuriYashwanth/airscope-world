@@ -197,7 +197,7 @@ export default function MapView() {
     };
 
     if (map.isStyleLoaded()) toggle();
-    else map.once('load', toggle);
+    else map.once('idle', toggle);
   }, [isHeatmapOn]);
 
   const addMarkers = useCallback((map: maplibregl.Map, cities: CityData[] = MOCK_CITIES) => {
