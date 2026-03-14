@@ -48,6 +48,7 @@ export const useAppStore = create<AppState>((set) => ({
   isDarkMode: window.matchMedia('(prefers-color-scheme: dark)').matches,
   isHeatmapOn: false,
   isZoomedIn: false,
+  isLiveData: false,
   setSelectedCity: (city) => set({ selectedCity: city, isPanelOpen: !!city }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setIsPanelOpen: (open) => set({ isPanelOpen: open }),
@@ -58,5 +59,6 @@ export const useAppStore = create<AppState>((set) => ({
   }),
   toggleHeatmap: () => set((state) => ({ isHeatmapOn: !state.isHeatmapOn })),
   setIsZoomedIn: (zoomed) => set({ isZoomedIn: zoomed }),
-  resetView: () => set({ isZoomedIn: false, selectedCity: null, isPanelOpen: false }),
+  setIsLiveData: (live) => set({ isLiveData: live }),
+  resetView: () => set({ isZoomedIn: false, selectedCity: null, isPanelOpen: false, isLiveData: false }),
 }));

@@ -21,6 +21,7 @@ export default function CitySearch() {
 
   const handleSelect = (city: typeof MOCK_CITIES[0]) => {
     setSelectedCity(city);
+    flyToCity(city.lng, city.lat);
     setQuery('');
     setIsFocused(false);
   };

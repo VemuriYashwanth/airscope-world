@@ -133,24 +133,25 @@ function PanelContent({ city, info, onClose }: { city: NonNullable<ReturnType<ty
           <h3 className="text-sm font-semibold text-foreground mb-3">7-Day Forecast</h3>
           <div className="space-y-2">
             {city.dailyForecast.map((d, i) => (
-            <div key={i} className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0">
-              <span className="text-sm text-foreground w-10">{d.day}</span>
-              <span className="text-lg">{d.icon}</span>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">{d.low}°</span>
-                <div className="w-16 h-1 rounded-full bg-secondary overflow-hidden">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${((d.high - d.low) / 40) * 100}%` }} />
+              <div key={i} className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0">
+                <span className="text-sm text-foreground w-10">{d.day}</span>
+                <span className="text-lg">{d.icon}</span>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-muted-foreground">{d.low}°</span>
+                  <div className="w-16 h-1 rounded-full bg-secondary overflow-hidden">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${((d.high - d.low) / 40) * 100}%` }} />
+                  </div>
+                  <span className="text-foreground font-medium">{d.high}°</span>
                 </div>
-                <span className="text-foreground font-medium">{d.high}°</span>
+                <AqiBadge aqi={d.aqi} />
               </div>
-              <AqiBadge aqi={d.aqi} />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* AQI Chart */}
-      <AqiChart data={city.hourlyForecast} />
+      {city.hourlyForecast.length > 0 && <AqiChart data={city.hourlyForecast} />}
     </div>
   );
 }
