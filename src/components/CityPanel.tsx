@@ -48,7 +48,7 @@ export default function CityPanel() {
 function PanelContent({ city, info, onClose }: { city: NonNullable<ReturnType<typeof useAppStore.getState>['selectedCity']>; info: ReturnType<typeof getAqiInfo>; onClose: () => void }) {
   const isLive = useAppStore((s) => s.isLiveData);
   return (
-    <div className="glass-panel rounded-t-3xl md:rounded-none md:h-full md:bg-card p-6 space-y-6">
+    <div className="glass-panel panel-solid rounded-t-3xl md:rounded-none md:min-h-full p-6 space-y-6 md:border-l md:border-border">
       {/* Drag handle mobile */}
       <div className="w-10 h-1 bg-muted-foreground/30 rounded-full mx-auto md:hidden" />
 

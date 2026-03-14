@@ -196,8 +196,24 @@ export default function MapView() {
       }
     };
 
-    if (map.isStyleLoaded()) toggle();
-    else map.once('idle', toggle);
+    if (map.isStyleLoaded() && map.getLayer('aqi-circle-layer')) {
+      toggle();
+    } else {
+      // Retry on style events until the layer exists
+      const onStyleData = () => {
+        if (map.getLayer('aqi-circle-layer')) {
+          toggle();
+          map.off('styledata', onStyleData);
+          map.off('idle', onStyleData);
+        }
+      };
+      map.on('styledata', onStyleData);
+      map.on('idle', onStyleData);
+      return () => {
+        map.off('styledata', onStyleData);
+        map.off('idle', onStyleData);
+      };
+    }
   }, [isHeatmapOn]);
 
   const addMarkers = useCallback((map: maplibregl.Map, cities: CityData[] = MOCK_CITIES) => {
