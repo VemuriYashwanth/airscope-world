@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Wind, Droplets, Sun, Thermometer } from 'lucide-react';
+import { X, Wind, Droplets, Sun, Thermometer, Radio } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { getAqiInfo } from '@/utils/aqi';
 import AqiChart from './AqiChart';
