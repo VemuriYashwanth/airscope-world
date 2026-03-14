@@ -109,6 +109,14 @@
   .aqi-unhealthy { background-color: hsl(var(--aqi-unhealthy)); }
   .aqi-very-unhealthy { background-color: hsl(var(--aqi-very-unhealthy)); }
   .aqi-hazardous { background-color: hsl(var(--aqi-hazardous)); }
+
+  @media (min-width: 768px) {
+    .panel-solid {
+      background: hsl(var(--card)) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+  }
 }
 
 .maplibregl-ctrl-bottom-left,
